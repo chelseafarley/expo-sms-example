@@ -2,6 +2,8 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, TextInput, Button, View } from 'react-native';
 import { useEffect, useState } from 'react';
 import * as SMS from 'expo-sms';
+import * as Print from 'expo-print';
+import * as FileSystem from 'expo-file-system';
 
 // expo install expo-sms
 
@@ -20,9 +22,26 @@ export default function App() {
   }, []);
 
   const sendSms = async () => {
+    console.log("Generating pdf");
+    const { uri } = await Print.printToFileAsync({
+      html: "<h1>Hi friends</h1>"
+    });
+
+    console.log(uri);
+
+    const contentUri = await FileSystem.getContentUriAsync(uri);
+    console.log(contentUri);
+
     const {result} = await SMS.sendSMSAsync(
       recipients,
-      message
+      message,
+      {
+        attachments: {
+          uri: contentUri,
+          mimeType: "application/pdf",
+          filename: "Hi.pdf"
+        }
+      }
     );
 
     console.log(result);
